@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const axios = require('axios');
 
-const db = new sqlite3.Database('../categories.db');
+const db = new sqlite3.Database('../data/categories.db');
 
 db.all('SELECT * FROM products', [], async (err, rows) => {
     if (err) {

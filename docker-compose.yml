@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80" 
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Backend/data:/app/data  
+    depends_on:
+      - solr
+
+  solr:
+    image: solr:8.11.4  
+    container_name: solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./solr:/var/solr/data  
+    environment:
+      - SOLR_HOME=/var/solr/data
+      - SOLR_URL=http://solr:8983/solr/products/select
+    command:
+      - solr-precreate
+      - products

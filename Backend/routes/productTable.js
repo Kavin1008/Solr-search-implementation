@@ -1,10 +1,13 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('categories.db');
+const path = require('path');
+const dbPath = path.join(__dirname, '..', 'data', 'categories.db');
+const db = new sqlite3.Database(dbPath);
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const verifyToken = require('../middlewares/verifyToken');
 const parseNaturalLanguageQuery = require('../utils/parseNaturalLanguageQuery');
+
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS products (
@@ -144,6 +147,7 @@ router.get('/ptable', verifyToken, (req, res) => {
     });
   });
 });
+
 router.get('/search', verifyToken, async (req, res) => {
   const { query: userInput, categoryName, page = 1, limit = 10 } = req.query;
   const start = (page - 1) * limit;
@@ -166,9 +170,10 @@ router.get('/search', verifyToken, async (req, res) => {
     } else if (maxPrice !== null) {
       solrQuery += ` AND discountPrice:[* TO ${maxPrice}]`;
     }
-
-    const solrUrl = `http://localhost:8983/solr/products/select?q=${encodeURIComponent(solrQuery)}&start=${start}&rows=${limit}&wt=json&defType=edismax&qf=productName^3 description^2 categoryName&pf=productName^5 description^3`;
-
+    const query = `?q=${encodeURIComponent(solrQuery)}&start=${start}&rows=${limit}&wt=json&defType=edismax&qf=productName^3 description^2 categoryName&pf=productName^5 description^3`;
+    const solrUrl = process.env.SOLR_URL?`${process.env.SOLR_URL}${query}` : `http://solr:8983/solr/products/select${query}`;
+    console.log(solrUrl);
+    
     const solrResponse = await axios.get(solrUrl);
 
     const { docs, numFound } = solrResponse.data.response;

@@ -5,7 +5,9 @@ const sqlite3 = require('sqlite3').verbose();
 const dotenv = require('dotenv').config();
 
 const router = express.Router();
-const db = new sqlite3.Database('./users.db');
+const path = require('path');
+const dbPath = path.join(__dirname, '..', 'data', 'users.db');
+const db = new sqlite3.Database(dbPath);
 
 db.run(`
     CREATE TABLE IF NOT EXISTS users (

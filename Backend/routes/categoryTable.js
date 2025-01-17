@@ -1,5 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('categories.db');
+const path = require('path');
+const dbPath = path.join(__dirname, '..', 'data', 'categories.db');
+const db = new sqlite3.Database(dbPath);
 const express = require('express');
 const verifyToken = require('../middlewares/verifyToken');
 const router = express.Router();
